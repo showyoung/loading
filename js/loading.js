@@ -47,27 +47,56 @@ $(window).on("load", function(){
 });
 var loading = () => {
     var mutationObserver = new MutationObserver(function(mutations, observer){
-        mutations.forEach(function(mutation) {
-            let target = mutation.addedNodes[0];
+        mutations.forEach(function(mutation){
+            var target = mutation.addedNodes[0];
             if(target != undefined && target.classList != undefined){
-                if(target.classList.contains("loading")){
-                    $(target).prepend(loadingElements);
-                    $(target).children("img").on("load", function(){
-                        $(target).children(".loading-container").animate({opacity: 0}, 1000, "linear", function(){
-                            $(target).children("img").off();
-                            $(this).remove();
-                        });
-                    });
-                    let video = $(target).children("video").get(0);
-                    let removeLoading = () => {
-                        $(target).children(".loading-container").animate({opacity: 0}, 1000, "linear", function(){
-                            video.removeEventListener("canplay", removeLoading);
-                            $(this).remove();
+                if(target.classList.contains("loading") || $(target).find(".loading").length > 0){
+                    if(target.classList.contains("loading")){
+                        var loadingTarget = target;
+                    }else{
+                        var loadingTarget = $(target).find(".loading").get(0);
+                    };
+                    $(loadingTarget).prepend(loadingElements);
+                    if($(loadingTarget).children("audio").length == 0 && $(loadingTarget).children("video").length == 0 && $(loadingTarget).children("img").length > 0){
+                        $(loadingTarget).children("img").on("load", function(){
+                            $(loadingTarget).children(".loading-container").animate({opacity: 0}, 1000, "linear", function(){
+                                $(loadingTarget).children("img").off();
+                                $(this).remove();
+                            });
                         });
                     };
-                    if(video != undefined){
-                        video.addEventListener("canplay", removeLoading);
-                    }
+                    if($(loadingTarget).children("video").length > 0){
+                        var video = $(loadingTarget).children("video").get(0);
+                        var removeVideoLoading = () => {
+                            $(loadingTarget).children(".loading-container").animate({opacity: 0}, 1000, "linear", function(){
+                                video.removeEventListener("canplay", removeVideoLoading);
+                                $(this).remove();
+                            });
+                        };
+                        if(video != undefined){
+                            video.addEventListener("canplay", removeVideoLoading);
+                        };
+                    };
+                    if($(loadingTarget).children("audio").length > 0){
+                        var audio = $(loadingTarget).children("audio").get(0);
+                        var removeAudioLoading = () => {
+                            $(loadingTarget).children(".loading-container").animate({opacity: 0}, 1000, "linear", function(){
+                                audio.removeEventListener("canplay", removeAudioLoading);
+                                $(this).remove();
+                            });
+                        };
+                        if(audio != undefined){
+                            audio.addEventListener("canplay", removeAudioLoading);
+                        };
+                    };
+                    if($(loadingTarget).children("iframe").length > 0){
+                        $(loadingTarget).children("iframe").on("load", function(){
+                            $(loadingTarget).children(".loading-container").animate({opacity: 0}, 1000, "linear", function(){
+                                $(loadingTarget).children("iframe").off();
+                                $(this).remove();
+                            });
+                        });
+                    };
                 };
             };
         });
